@@ -7,6 +7,8 @@ originally from https://github.com/KellerJordan/Muon/blob/master/muon.py
 import math
 
 import torch
+from axolotl.integrations.base import BaseOptimizerFactory
+
 
 @torch.compile
 def zeropower_via_newtonschulz5(G, steps):
@@ -200,3 +202,34 @@ class Muon(torch.optim.Optimizer):
                 p.data.add_(g, alpha=-lr / scale)
 
         return loss
+
+
+class MuonOptimizerFactory(BaseOptimizerFactory):
+    def __call__(self, opt_model, training_args, **optimizer_kwargs) -> "Muon":
+        lr = optimizer_kwargs.pop("lr")
+        wd = optimizer_kwargs.pop("weight_decay")
+        adamw_betas = optimizer_kwargs.pop("betas", (0.95, 0.95))
+        adamw_eps = optimizer_kwargs.pop("eps", 1.0e-8)
+
+        muon_params = []
+        adamw_params = []
+
+        for name, param in opt_model.named_parameters():
+            if not param.requires_grad or param.ndim < 2:
+                continue
+            if name.endswith("modules_to_save.default.weight") or any(
+                embed_name in name for embed_name in ["embed_tokens", "lm_head"]
+            ):
+                adamw_params.append(param)
+            else:
+                muon_params.append(param)
+
+        return Muon(
+            lr=lr,
+            wd=wd,
+            muon_params=muon_params,
+            adamw_params=adamw_params,
+            adamw_betas=adamw_betas,
+            adamw_eps=adamw_eps,
+            **optimizer_kwargs,
+        )
