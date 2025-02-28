@@ -4,6 +4,7 @@ Muon optimizer
 from https://github.com/MoonshotAI/Moonlight/blob/master/examples/toy_train.py
 originally from https://github.com/KellerJordan/Muon/blob/master/muon.py
 """
+import math
 
 import torch
 
