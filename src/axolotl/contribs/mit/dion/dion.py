@@ -1,3 +1,6 @@
+# License MIT
+# Copyright (c) Microsoft Corporation.
+# https://github.com/microsoft/dion
 
 import math
 import torch
