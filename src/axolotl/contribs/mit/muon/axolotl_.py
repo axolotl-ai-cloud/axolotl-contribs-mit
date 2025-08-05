@@ -144,8 +144,10 @@ class MuonOptimizerFactory(BaseOptimizerFactory):
             # Determine which mesh to use for distributed communication
             if outer_shard_mesh and outer_shard_mesh.size() > 1:
                 distributed_mesh = outer_shard_mesh
-            elif replicate_mesh and replicate_mesh.size() > 1:
+            elif replicate_mesh:
                 distributed_mesh = replicate_mesh
+            else:
+                raise ValueError("Unknown device_mesh configuration for Muon.")
 
         elif isinstance(opt_model, DDP):
             distributed_mesh = opt_model.process_group  # using ProcessGroup for DDP
