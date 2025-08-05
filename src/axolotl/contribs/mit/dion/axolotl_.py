@@ -23,7 +23,7 @@ class DionOptimizerFactory(BaseOptimizerFactory):
                 replicate_mesh = device_mesh["dp_replicate"]
             if "dp_shard" in device_mesh.mesh_dim_names:
                 outer_shard_mesh = device_mesh["dp_shard"]
-            if "tp_shard" in device_mesh.mesh_dim_names:
+            if "tp" in device_mesh.mesh_dim_names:
                 inner_shard_mesh = device_mesh["tp"]
 
         weight_decay = optimizer_kwargs.get("weight_decay", None)
