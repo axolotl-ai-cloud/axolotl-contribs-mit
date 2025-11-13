@@ -1,5 +1,5 @@
 """
-distributed muon optimizer for fsdp2 and tensor parallelism
+distributed muon optimizer for fsdp2
 
 based on microsoft/dion muon implementation
 https://github.com/microsoft/dion
@@ -35,7 +35,7 @@ class DistMuon(Optimizer):
     args:
         params: parameters for the optimizer.
         distributed_mesh: devicemesh or processgroup for distributed training.
-            use devicemesh for fsdp2 and processgroup for distributeddataparallel.
+            use devicemesh for fsdp2 (1d mesh only) and processgroup for distributeddataparallel.
         lr: base learning rate. for muon, this will be scaled based on the matrix dimensions.
             for element-wise update rules, this is the actual learning rate and no additional scaling is done.
         mu: momentum factor for muon algorithm.
@@ -53,6 +53,8 @@ class DistMuon(Optimizer):
 
     muon optimizer algorithm by keller jordan: https://kellerjordan.github.io/posts/muon/
     fsdp2 muon uses all-to-all communications: https://www.essential.ai/blog/infra
+
+    note: tensor parallelism is not currently supported. only 1d data parallel sharding is supported.
     """
 
     def __init__(
@@ -609,8 +611,8 @@ class DistMuonOptimizerFactory(BaseOptimizerFactory):
             elif device_mesh.ndim == 1:
                 distributed_mesh = device_mesh
 
-        lr = optimizer_kwargs.get("lr")
-        weight_decay = optimizer_kwargs.get("weight_decay", 0.0)
+        lr = optimizer_kwargs.pop("lr")
+        weight_decay = optimizer_kwargs.pop("weight_decay", 0.0)
 
         decay_parameters: list[str] = self.get_decay_parameter_names(opt_model)
 
@@ -688,8 +690,6 @@ class DistMuonOptimizerFactory(BaseOptimizerFactory):
                     "weight_decay": 0.0,
                 }
             )
-
-        optimizer_kwargs.pop("weight_decay", None)
 
         return self.optim_cls(
             optimizer_grouped_parameters,
