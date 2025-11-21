@@ -1,7 +1,7 @@
 """
-distributed muon optimizer for fsdp2
+Distributed muon optimizer for FSDP2.
 
-based on microsoft/dion muon implementation
+Based on microsoft/dion muon implementation
 https://github.com/microsoft/dion
 """
 
@@ -50,9 +50,6 @@ class DistMuon(Optimizer):
         flatten: whether to flatten 3d+ tensors to 2d for muon updates.
             true: tensors with 3+ dimensions are flattened to 2d. use this for convolutional layers.
             false: tensors are not flattened. 3d+ tensors are treated as batches of 2d matrices.
-
-    muon optimizer algorithm by keller jordan: https://kellerjordan.github.io/posts/muon/
-    fsdp2 muon uses all-to-all communications: https://www.essential.ai/blog/infra
 
     note: tensor parallelism is not currently supported. only 1d data parallel sharding is supported.
     """
